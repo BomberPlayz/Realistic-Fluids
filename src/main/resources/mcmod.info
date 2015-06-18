@@ -1,16 +1,17 @@
-[
 {
-  "modid": "realisticfluids",
-  "name": "Realistic Fluids Overhaul",
-  "description": "Realistic Fluids Overhaul",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
-  "authorList": ["FHT"],
-  "credits": "FHT",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "realisticfluids",
+    "name": "Realistic Fluids Overhaul",
+    "description": "Realistic Fluids Overhaul",
+    "version": "0.3",
+    "mcversion": "1.7.10",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["FHT,Canisaur"],
+    "credits": "FHT",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": ["Forge,CoFHCore,CodeChickenCore"]
+  }]
 }
-]

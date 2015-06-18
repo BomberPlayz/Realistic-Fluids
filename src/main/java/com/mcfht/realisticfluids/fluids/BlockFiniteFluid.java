@@ -14,6 +14,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import cofh.asmhooks.block.BlockWater;
 
 import com.mcfht.realisticfluids.FluidData;
 import com.mcfht.realisticfluids.FluidData.ChunkData;
@@ -28,7 +29,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * @author FHT
  */
-public class BlockFiniteFluid extends BlockLiquid
+public class BlockFiniteFluid extends BlockWater
 {
 	/** Tendency of this liquid to flow */
 	public final int	viscosity;

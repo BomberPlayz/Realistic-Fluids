@@ -38,10 +38,6 @@ public class FluidConfig
 		RealisticFluids.EQUALIZE_GLOBAL = 5 * config.getInt("globalEqualizeCap", "2 - Equalization", 8, 1, 1024,
 				"Max Equalizations per tick. More causes faster equalization. Sane values: 4 ~ 32");
 
-		// /////////////// COREMOD STUFZ //////////////////
-		RealisticFluids.ASM_DOOR = config.getBoolean("patchVanillaDoors", "3 - Core Mods", true,
-				"Force vanilla doors to throw block updates when opened (allowing water to flow through them)");
-
 		config.save();
 	}
 

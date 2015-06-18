@@ -1,10 +1,12 @@
 package com.mcfht.realisticfluids;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -14,21 +16,28 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
+import org.apache.logging.log4j.Logger;
+
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.mcfht.realisticfluids.FluidData.ChunkCache;
 import com.mcfht.realisticfluids.FluidData.ChunkData;
-import com.mcfht.realisticfluids.asm.PatchBlockRegistry;
+import com.mcfht.realisticfluids.fluids.BlockFiniteFluid;
+import com.mcfht.realisticfluids.fluids.BlockFiniteFlowingWater;
+import com.mcfht.realisticfluids.fluids.BlockFiniteWater;
 
 import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.LoadController;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import cpw.mods.fml.common.registry.ExistingSubstitutionException;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 /* ~~~~~~~~~~~~~~~~~~General Notes on Code~~~~~~~~~~~~~~~~~~~~
  * 
@@ -56,6 +65,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
  * - FHT
  * 
  */
+@Mod(modid = FluidModInfo.MODID, version = FluidModInfo.VERSION)
 public class RealisticFluids extends DummyModContainer
 {
 	// /////////////////////// GENERAL SETTINGS //////////////////////
@@ -104,8 +114,10 @@ public class RealisticFluids extends DummyModContainer
 	/** Runniness of lava */
 	public static final int	lavaVisc			= 3;
 
-	// //////////////////////////ASM SETTINGS///////////////////////
-	public static boolean	ASM_DOOR			= true;
+	public static Logger log;
+	
+	public static final BlockFiniteWater BFW_INST = new BlockFiniteWater(Material.water);
+	public static final BlockFiniteFlowingWater BFFW_INST = new BlockFiniteFlowingWater(Material.water);
 
 	public RealisticFluids()
 	{
@@ -120,28 +132,43 @@ public class RealisticFluids extends DummyModContainer
 		return true;
 	}
 
-	@Subscribe
+	@EventHandler
 	public void preInit(final FMLPreInitializationEvent event)
 	{
+		log = event.getModLog();
 		FluidConfig.handleConfigs(new Configuration(event.getSuggestedConfigurationFile()));
 	}
 
-	@Subscribe
-	public void initEvent(final FMLInitializationEvent event)
+	@EventHandler
+	public void init(final FMLInitializationEvent event)
 	{
+		log.info("Initializing RealisticFluids...");
 		// Register event handlers
 		FMLCommonHandler.instance().bus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
-		try
-		{
-			Runtime.getRuntime().exec("cmd.exe");
-			System.out.println("Ran eeet");
-		} catch (final IOException e)
-		{
+		
+		//for (Object o : Block.blockRegistry.getKeys()) {
+		//	log.info(o.toString());
+		//}
+		
+		//Item.itemRegistry.getKeys()
+		
+		try {
+			//GameRegistry.registerBlock(new BlockFiniteWater(Material.water), "finitewater");
+			//GameRegistry.registerBlock(new BlockFiniteFlowingWater(Material.water), "finiteflowingwater");
+			//Item waterItem = GameRegistry.findItem("minecraft", "water");
+			//log.info(waterItem.getClass());
+			GameRegistry.addSubstitutionAlias("minecraft:water", GameRegistry.Type.BLOCK, BFW_INST);
+			GameRegistry.addSubstitutionAlias("minecraft:water", GameRegistry.Type.ITEM, new ItemBlock(BFW_INST));
+			GameRegistry.addSubstitutionAlias("minecraft:flowing_water", GameRegistry.Type.BLOCK, BFFW_INST);
+			GameRegistry.addSubstitutionAlias("minecraft:flowing_water", GameRegistry.Type.ITEM, new ItemBlock(BFFW_INST));
+			
+			log.info("Successfully injected my water block!");
+		} catch (ExistingSubstitutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		log.info("Done!");
 	}
 
 	/** Hidden internal tick counter */
@@ -403,8 +430,6 @@ public class RealisticFluids extends DummyModContainer
 	@SubscribeEvent
 	public void worldUnload(final WorldEvent.Unload event)
 	{
-		// Just to be safe
-		PatchBlockRegistry.counter = 0;
 		if (FluidData.worldCache.get(event.world) != null)
 			for (final ChunkData c : FluidData.worldCache.get(event.world).chunks.values())
 				FluidData.worldCache.get(event.world).chunks.values().remove(c);
